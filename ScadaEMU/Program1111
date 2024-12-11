@@ -1,0 +1,32 @@
+﻿using ScadaEMU.Entities;
+using ScadaEMU.Entities.Sensors;
+
+
+namespace Lab3automatedDrainage
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var tank = new TheTank(); tank.Level = 0;
+
+            tank.Sensors.Add(new TheLevelSensor("EmptyLevel", "Threshold",22,18));
+            tank.Sensors.Add(new TheLevelSensor("HighLevel", "---", 210, 190));
+            tank.Sensors.Add(new TheLevelSensor("AlarmLevel", "!!!!!", 240, 220));
+            tank.Valve.TurnOn(); tank.Pump.TurnOff(); Console.Clear();
+
+            Console.WriteLine("Система автоматического водотведения\n");
+
+            ulong i = 0;
+            while (true) 
+            {
+                Console.SetCursorPosition(0,3); Console.WriteLine($"Iteration = {i}\n  ");
+                Console.WriteLine($"Waste level = {tank.Level,1:F} liters   \n");
+                tank.Monitor();
+
+                i++; 
+                Thread.Sleep(200);
+            }
+        }
+    }
+}
