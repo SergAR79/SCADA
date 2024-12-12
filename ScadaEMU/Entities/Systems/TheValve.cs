@@ -9,7 +9,7 @@ namespace ScadaEMU.Entities.Systems
 {
     public class TheValve : ValveModel
     {
-        public bool IsOn { get; private set; }
+        public bool IsOn { get; set; }
         public int Id { get; set; }
 
         public void TurnOn()

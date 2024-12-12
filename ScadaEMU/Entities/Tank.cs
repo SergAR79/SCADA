@@ -31,6 +31,8 @@ namespace ScadaEMU.Entities
         private TextBox textEcho;
 
 
+        TheLevelSensor sThreshold, sHigh, sAlarm;
+
         public Tank(Guid tankId, CheckBox checkAlarm, CheckBox checkAlarmbackup, 
             CheckBox checkThreshold, CheckBox checkHighlevel, System.Windows.Forms.Timer timerTank, 
             PictureBox picWaste, PictureBox picPump, PictureBox picTank,
@@ -58,7 +60,7 @@ namespace ScadaEMU.Entities
 
         public void PumpingOn()
         {
-            Pumping = true;
+            //Pumping = true;
             echo("Pumping Enabled");
             picPump.Image = ScadaEMU.Properties.Resources.pumpR;
             picPump.Update();
@@ -66,7 +68,7 @@ namespace ScadaEMU.Entities
 
         public void PumpingOff()
         {
-            Pumping = false; picPump.Image = null;
+            //Pumping = false; picPump.Image = null;
             echo("Pumping Disabled");
             picPump.Update();
         }
@@ -75,7 +77,7 @@ namespace ScadaEMU.Entities
         {
             foreach (var sensor in Sensors)
             {
-                sensor.CheckLevel(Level);
+                sensor.CheckLevel(WasteLevel);
             }
 
             TheLevelSensor sThreshold = Sensors.FirstOrDefault(s => s.Name == "EmptyLevel");
@@ -89,7 +91,7 @@ namespace ScadaEMU.Entities
 
             if (Pump.IsOn)
             {
-                if (sThreshold.Engaged) Level -= ScadaCore.Constants.OptionsConstants.PumpingSpeed;
+                if (sThreshold.Engaged) WasteLevel -= ScadaCore.Constants.OptionsConstants.PumpingSpeed;
                 else
                 {
                     Pump.TurnOff();
@@ -99,7 +101,7 @@ namespace ScadaEMU.Entities
 
             if (Valve.IsOn)
             {
-                if (!sAlarm.Engaged) Level += ScadaCore.Constants.OptionsConstants.FillingSpeed;
+                if (!sAlarm.Engaged) WasteLevel += ScadaCore.Constants.OptionsConstants.FillingSpeed;
                 else
                 {
                     Valve.TurnOff();
@@ -110,41 +112,41 @@ namespace ScadaEMU.Entities
         }
         public void updateLevel()
             {
-               if(Level >= ThresholdLevel)       //защелка
+               if(WasteLevel >= sThreshold.OnLevel)       //защелка
                     {
                         checkThreshold.Checked=true;
                     }
-               if (Level >= HighLevel) checkHighlevel.Checked = true; //верхний уровень
-               if (Pumping)                     //отбор
+               if (WasteLevel >= sHigh.OnLevel) checkHighlevel.Checked = true; //верхний уровень
+               if (Pump.IsOn)                     //отбор
                    {
-                   if (Level >= ThresholdLevel)
-                         Level -= PumpingSpeed;
+                   if (WasteLevel >= sThreshold.OffLevel)
+                         WasteLevel -= ScadaCore.Constants.OptionsConstants.PumpingSpeed;
                    else                         //ниже защелки
                         {
                             checkAlarm.Checked = false;
                             checkAlarmbackup.Checked = false;
                             checkHighlevel.Checked = false;
                             checkThreshold.Checked = false;
-                            if(Pumping) PumpingOff();
+                            //if(Pumping) PumpingOff();
                         }
                    }
                else
                    if (checkHighlevel.Checked) PumpingOn();
-               if (Filling)                                     //кран
+               if (Valve.IsOn)                                     //кран
                    {
-                   if (Level < AlarmLevel)
-                       Level += FillingSpeed;
+                   if (WasteLevel < sAlarm.OnLevel)
+                       WasteLevel += ScadaCore.Constants.OptionsConstants.FillingSpeed;
                    }
-               if (checkAlarm.Checked || checkAlarmbackup.Checked || Level >= AlarmLevel) //авария 
+               if (checkAlarm.Checked || checkAlarmbackup.Checked || WasteLevel >= sAlarm.OnLevel) //авария 
                    {
-                      if(Filling) Filling = false;
+                      if(Valve.IsOn) Valve.TurnOff();
                       checkAlarm.Checked = true;
                       checkAlarmbackup.Checked = true;
-                      if(!Pumping) PumpingOn();
+                      if(!Pump.IsOn) PumpingOn();
                    }
 
-                labelTank.Text = Level.ToString("F2");  
-                picWaste.Height = (int)(Level*((double)(0.83*picTank.Height)/Capacity));
+                labelTank.Text = WasteLevel.ToString("F2");  
+                picWaste.Height = (int)(WasteLevel *((double)(0.83*picTank.Height)/Capacity));
                 picWaste.Top = picTank.Top+picTank.Height-picWaste.Height-1;
                 picWaste.Update();
             }
