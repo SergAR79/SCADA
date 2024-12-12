@@ -11,6 +11,6 @@ namespace ScadaCore.Constants
         public const string DbOptionsKey = "DbOptions";
         public const double PumpingSpeed = 11.87;
         public const double FillingSpeed = 3.13;
-        const string apiurl = "https://localhost:7177/swagger/";
+        public const string apiurl = "https://localhost:7177/swagger/";
     }
 }
