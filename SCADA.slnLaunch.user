@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Новый профиль",
+    "Projects": [
+      {
+        "Path": "ScadaAPI\\ScadaAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "ScadaEMU\\ScadaEMU.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
